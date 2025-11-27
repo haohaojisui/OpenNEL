@@ -6,6 +6,7 @@ using Codexus.OpenSDK.Yggdrasil;
 using OpenNEL.type;
 using Serilog;
 using OpenNEL.Utils;
+using UpdaterService = OpenNEL.Updater.Updater;
 
 namespace OpenNEL;
 
@@ -30,6 +31,8 @@ internal class Program
             "- 采用相同许可证分发" +
             "\n" +
             "- 提供完整的源代码");
+
+        await UpdaterService.UpdateAsync(AppInfo.AppVersion);
 
         await new WebSocketServer().StartAsync();
         await InitializeSystemComponentsAsync();

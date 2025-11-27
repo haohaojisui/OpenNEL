@@ -1,14 +1,13 @@
 using OpenNEL.network;
 using OpenNEL.type;
 using System.Text.Json;
-using System.Text;
 
 namespace OpenNEL.HandleWebSocket.Game;
 
 internal class ListChannelsHandler : IWsHandler
 {
     public string Type => "list_channels";
-    public async Task ProcessAsync(System.Net.WebSockets.WebSocket ws, JsonElement root)
+    public async Task<object?> ProcessAsync(JsonElement root)
     {
         var items = AppState.Channels.Values.Select(ch => new {
             serverId = ch.ServerId,
@@ -20,7 +19,6 @@ internal class ListChannelsHandler : IWsHandler
             address = ch.Ip + ":" + ch.Port,
             identifier = ch.Identifier.ToString()
         }).ToArray();
-        var msg = JsonSerializer.Serialize(new { type = "channels", items });
-        await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)), System.Net.WebSockets.WebSocketMessageType.Text, true, System.Threading.CancellationToken.None);
+        return new { type = "channels", items };
     }
 }

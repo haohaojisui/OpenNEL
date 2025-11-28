@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
-using OpenNEL.HandleWebSocket;
+using OpenNEL.Message;
 using OpenNEL.type;
 using OpenNEL.Utils;
 
@@ -181,7 +181,7 @@ internal class WebSocketServer
                 var type = root.TryGetProperty("type", out var t) ? t.GetString() : null;
                 if (!string.IsNullOrWhiteSpace(type))
                 {
-                    var handler = HandlerFactory.Get(type);
+                    var handler = MessageFactory.Get(type);
                     if (handler != null)
                     {
                         object? payload = null;

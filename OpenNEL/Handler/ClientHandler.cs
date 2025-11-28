@@ -7,7 +7,7 @@ using Codexus.Cipher.Protocol;
 using OpenNEL;
 using OpenNEL.Entities;
 using OpenNEL.Extensions;
-using OpenNEL.HandleWebSocket.Connection;
+using OpenNEL.Message.Connection;
 using OpenNEL.Type;
 using Serilog;
 

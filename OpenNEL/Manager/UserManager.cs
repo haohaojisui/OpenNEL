@@ -254,12 +254,12 @@ public class UserManager : IUserManager
 	{
 		try
 		{
-            if (!File.Exists("users.json"))
+            if (!File.Exists(UsersFilePath))
             {
                 Log.Information("未找到用户文件，使用空的用户列表启动");
                 return;
             }
-			List<EntityUser> list = JsonSerializer.Deserialize<List<EntityUser>>(await File.ReadAllTextAsync("users.json")) ?? new List<EntityUser>();
+			List<EntityUser> list = JsonSerializer.Deserialize<List<EntityUser>>(await File.ReadAllTextAsync(UsersFilePath)) ?? new List<EntityUser>();
 			_users.Clear();
 			foreach (EntityUser item in list)
 			{
@@ -299,7 +299,7 @@ public class UserManager : IUserManager
 			{
 				List<EntityUser> usersList = _users.Values.ToList();
 				string contents = JsonSerializer.Serialize(usersList, JsonOptions);
-				await File.WriteAllTextAsync("users.json", contents);
+				await File.WriteAllTextAsync(UsersFilePath, contents);
 				_isDirty = false;
                 Log.Debug("已将 {Count} 个用户保存到磁盘", usersList.Count);
 			}

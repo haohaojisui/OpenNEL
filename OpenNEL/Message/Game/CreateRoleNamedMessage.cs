@@ -5,6 +5,7 @@ using System.Text.Json;
 using Codexus.Cipher.Entities;
 using Codexus.Cipher.Entities.WPFLauncher.NetGame;
 using Serilog;
+using OpenNEL.Manager;
 
 namespace OpenNEL.Message.Game;
 
@@ -15,11 +16,9 @@ internal class CreateRoleNamedMessage : IWsMessage
     {
         var serverId = root.TryGetProperty("serverId", out var sid) ? sid.GetString() : null;
         var name = root.TryGetProperty("name", out var n) ? n.GetString() : null;
-        var sel = AppState.SelectedAccountId;
-        if (string.IsNullOrEmpty(sel) || !AppState.Auths.TryGetValue(sel, out var auth))
-        {
-            return new { type = "notlogin" };
-        }
+        var last = UserManager.Instance.GetLastAvailableUser();
+        if (last == null) return new { type = "notlogin" };
+        var auth = new Codexus.OpenSDK.Entities.X19.X19AuthenticationOtp { EntityId = last.UserId, Token = last.AccessToken };
         if (string.IsNullOrWhiteSpace(serverId) || string.IsNullOrWhiteSpace(name))
         {
             return new { type = "server_roles_error", message = "参数错误" };

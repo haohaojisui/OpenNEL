@@ -10,29 +10,12 @@ namespace OpenNEL.Message.Connected;
 
 public class GetAccountMessage : IWsMessage
 {
-    public string Type => "get_accounts";
+    public string Type => "list_accounts";
 
     public async Task<object?> ProcessAsync(JsonElement root)
     {
-        var mode = root.TryGetProperty("mode", out var m) ? m.GetString() : null;
-        if (!string.IsNullOrEmpty(mode))
-        {
-            if (mode == "available-for-mobile")
-            {
-                var availableUsers = UserManager.Instance.GetAvailableUsers();
-                return new Entity("get_accounts", JsonSerializer.Serialize(availableUsers));
-            }
-            else
-            {
-                var availableUsers = UserManager.Instance.GetAvailableUsers();
-                return new Entity("get_accounts", JsonSerializer.Serialize(availableUsers));
-            }
-        }
-        else
-        {
-            List<EntityUser> usersNoDetails = UserManager.Instance.GetUsersNoDetails();
-            IEnumerable<EntityUser> value = usersNoDetails.AsEnumerable();
-            return new Entity("get_accounts", JsonSerializer.Serialize(value));
-        }
+        var users = UserManager.Instance.GetUsersNoDetails();
+        var items = users.Select(u => new { entityId = u.UserId, channel = u.Channel }).ToArray();
+        return new { type = "accounts", items };
     }
 }

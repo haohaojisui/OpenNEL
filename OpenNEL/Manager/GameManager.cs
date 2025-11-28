@@ -10,6 +10,7 @@ using Codexus.OpenSDK;
 using Codexus.Interceptors;
 using OpenNEL.Entities.Web.NEL;
 using OpenNEL.type;
+using OpenNEL.Manager;
 using OpenNEL.Utils;
 using Serilog;
 
@@ -35,12 +36,15 @@ internal class GameManager
 
     public async Task<bool> StartAsync(string serverId, string serverName, string roleId)
     {
-        var sel = AppState.SelectedAccountId;
-        if (string.IsNullOrEmpty(sel) || !AppState.Auths.TryGetValue(sel, out var auth)) return false;
+        var available = UserManager.Instance.GetLastAvailableUser();
+        if (available == null) return false;
+        var entityId = available.UserId;
+        var token = available.AccessToken;
+        var auth = new Codexus.OpenSDK.Entities.X19.X19AuthenticationOtp { EntityId = entityId, Token = token };
 
         var roles = await auth.Api<EntityQueryGameCharacters, Entities<EntityGameCharacter>>(
             "/game-character/query/user-game-characters",
-            new EntityQueryGameCharacters { GameId = serverId, UserId = auth.EntityId });
+            new EntityQueryGameCharacters { GameId = serverId, UserId = entityId });
         var selected = roles.Data.FirstOrDefault(r => r.Name == roleId);
         if (selected == null) return false;
 
@@ -56,8 +60,8 @@ internal class GameManager
         var gameVersion = GameVersionUtil.GetEnumFromGameVersion(version.Name);
 
         var serverModInfo = await InstallerService.InstallGameMods(
-            auth.EntityId,
-            auth.Token,
+            entityId,
+            token,
             gameVersion,
             new WPFLauncher(),
             serverId,
@@ -75,8 +79,8 @@ internal class GameManager
             address.Data!.Ip,
             address.Data!.Port,
             selected.Name,
-            auth.EntityId,
-            auth.Token,
+            entityId,
+            token,
             (Action<string>)((sid) =>
             {
                 var pair = Md5Mapping.GetMd5FromGameVersion(version.Name);
@@ -92,7 +96,7 @@ internal class GameManager
                             BootstrapMd5 = pair.BootstrapMd5,
                             DatFileMd5 = pair.DatFileMd5,
                             Mods = JsonSerializer.Deserialize<Codexus.OpenSDK.Entities.Yggdrasil.ModList>(mods)!,
-                            User = new Codexus.OpenSDK.Entities.Yggdrasil.UserProfile { UserId = int.Parse(auth.EntityId), UserToken = auth.Token }
+                            User = new Codexus.OpenSDK.Entities.Yggdrasil.UserProfile { UserId = int.Parse(entityId), UserToken = token }
                         }, sid);
                         if (success.IsSuccess)
                         {
@@ -136,7 +140,7 @@ internal class GameManager
             Port = address.Data!.Port,
             RoleName = selected.Name,
             Cts = cts,
-            PlayerId = auth.EntityId,
+            PlayerId = entityId,
             ForwardHost = address.Data!.Ip,
             ForwardPort = address.Data!.Port,
             LocalPort = address.Data!.Port,
@@ -144,7 +148,7 @@ internal class GameManager
             Identifier = identifier
         };
 
-        await X19.InterconnectionApi.GameStartAsync(auth.EntityId, auth.Token, serverId);
+        await X19.InterconnectionApi.GameStartAsync(entityId, token, serverId);
         return true;
     }
     

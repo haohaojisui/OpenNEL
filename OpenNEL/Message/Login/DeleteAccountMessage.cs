@@ -1,5 +1,5 @@
 using OpenNEL.Network;
-using OpenNEL.type;
+using OpenNEL.Manager;
 using System.Text.Json;
 using Serilog;
 namespace OpenNEL.Message.Login;
@@ -14,18 +14,10 @@ internal class DeleteAccountMessage : IWsMessage
         {
             return new { type = "delete_error", message = "entityId为空" };
         }
-        if (AppState.Accounts.TryRemove(id, out _))
-        {
-            if(AppState.Debug)Log.Information("已删除账号: {Id}", id);
-            
-            if (AppState.SelectedAccountId == id) AppState.SelectedAccountId = null;
-            AppState.Auths.TryRemove(id, out _);
-        }
-        else
-        {
-            Log.Warning("删除账号失败，未找到: {Id}", id);
-        }
-        var items = AppState.Accounts.Select(kv => new { entityId = kv.Key, channel = kv.Value }).ToArray();
+        UserManager.Instance.RemoveAvailableUser(id);
+        UserManager.Instance.RemoveUser(id);
+        var users = UserManager.Instance.GetUsersNoDetails();
+        var items = users.Select(u => new { entityId = u.UserId, channel = u.Channel }).ToArray();
         return new { type = "accounts", items };
     }
 }

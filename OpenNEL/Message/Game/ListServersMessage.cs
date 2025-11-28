@@ -3,6 +3,7 @@ using OpenNEL.Utils;
 using System.Text.Json;
 using Serilog;
 using OpenNEL.type;
+using OpenNEL.Manager;
 using Codexus.Cipher.Entities.WPFLauncher.NetGame;
 using Codexus.Cipher.Entities;
 
@@ -13,26 +14,13 @@ internal class ListServersMessage : IWsMessage
     public string Type => "list_servers";
     public async Task<object?> ProcessAsync(JsonElement root)
     {
-        var sel = AppState.SelectedAccountId;
-        if (string.IsNullOrEmpty(sel) || !AppState.Auths.TryGetValue(sel, out var auth))
-        {
-            return new { type = "notlogin" };
-        }
+        var last = UserManager.Instance.GetLastAvailableUser();
+        if (last == null) return new { type = "notlogin" };
         try
         {
             const int pageSize = 15;
             var offset = 0;
-            var servers = await auth.Api<EntityNetGameRequest, Entities<EntityNetGameItem>>(
-                "/item/query/available",
-                new EntityNetGameRequest
-                {
-                    AvailableMcVersions = Array.Empty<string>(),
-                    ItemType = 1,
-                    Length = pageSize,
-                    Offset = offset,
-                    MasterTypeId = "2",
-                    SecondaryTypeId = ""
-                });
+            var servers = AppState.X19.GetAvailableNetGames(last.UserId, last.AccessToken, offset, pageSize);
             
             if(AppState.Debug) Log.Information("服务器列表: 数量={Count}", servers.Data?.Length ?? 0);
             var items = servers.Data.Select(s => new { entityId = s.EntityId, name = s.Name }).ToArray();

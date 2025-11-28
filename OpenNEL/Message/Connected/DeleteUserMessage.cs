@@ -15,7 +15,8 @@ internal class DeleteUserMessage : IWsMessage
         if (string.IsNullOrWhiteSpace(id)) return null;
         UserManager.Instance.RemoveUser(id);
         UserManager.Instance.RemoveAvailableUser(id);
-        var accounts = UserManager.Instance.GetAvailableUsers();
-        return new Entity("get_accounts", System.Text.Json.JsonSerializer.Serialize(accounts));
+        var users = UserManager.Instance.GetUsersNoDetails();
+        var items = users.Select(u => new { entityId = u.UserId, channel = u.Channel }).ToArray();
+        return new { type = "accounts", items };
     }
 }

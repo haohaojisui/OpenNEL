@@ -23,6 +23,13 @@ public class LoginMessage : IWsMessage
     public async Task<object?> ProcessAsync(JsonElement root)
     {
         EntityLoginRequest? entity = JsonSerializer.Deserialize<EntityLoginRequest>(root.GetRawText());
+        if (entity == null || string.IsNullOrWhiteSpace(entity.Channel))
+        {
+            if (root.TryGetProperty("cookie", out var ck) && ck.ValueKind == JsonValueKind.String)
+            {
+                entity = new EntityLoginRequest { Channel = "netease", Type = "cookie", Details = ck.GetString() ?? string.Empty };
+            }
+        }
         if (entity == null)
         {
             return new Entity("login", "Success");
@@ -43,17 +50,21 @@ public class LoginMessage : IWsMessage
         }
         catch (VerifyException exception)
         {
-            return new Entity("login", EntityResponse.Error(1002, exception));
+            return new { type = "login_error", message = exception.Message };
         }
         catch (CaptchaException exception2)
         {
-            string append = entity?.Details ?? string.Empty;
-            return new Entity("login", EntityResponse.Error(1001, CaptchaException.Clone(exception2, append)));
+            return new { type = "login_error", message = exception2.Message };
         }
         catch (Exception exception3)
         {
             Log.Error(exception3, "Login failed");
-            return new Entity("login", EntityResponse.Error(1001, exception3));
+            var msg = exception3.Message ?? string.Empty;
+            if (msg.IndexOf("token expired", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return new { type = "login_error", message = "当前cookie过期了" };
+            }
+            return new { type = "login_error", message = msg };
         }
     }
 
@@ -77,12 +88,20 @@ public class LoginMessage : IWsMessage
         {
             LoginWithChannelAndType(entityUser.Channel, entityUser.Type, entityUser.Details, entity.Platform, entity.Token);
         }
-        var accounts = UserManager.Instance.GetAvailableUsers();
-        return new object[]
+        var last = UserManager.Instance.GetLastAvailableUser();
+        var list = new System.Collections.ArrayList();
+        if (last != null)
         {
-            new Entity("login", EntityResponse.Success(string.Empty)),
-            new Entity("get_accounts", JsonSerializer.Serialize(accounts))
-        };
+            var u = UserManager.Instance.GetUserByEntityId(last.UserId);
+            if (u != null)
+            {
+                list.Add(new { type = "Success_login", entityId = u.UserId, channel = u.Channel });
+            }
+        }
+        var users = UserManager.Instance.GetUsersNoDetails();
+        var items = users.Select(u => new { entityId = u.UserId, channel = u.Channel }).ToArray();
+        list.Add(new { type = "accounts", items });
+        return list;
     }
 
     private static object HandleActiveWithCaptcha(EntityLoginRequest entity)
@@ -113,23 +132,39 @@ public class LoginMessage : IWsMessage
             });
             LoginWithChannelAndType(userByEntityId.Channel, userByEntityId.Type, details, entity.Platform, entity.Token);
         }
-        var accounts = UserManager.Instance.GetAvailableUsers();
-        return new object[]
+        var last = UserManager.Instance.GetLastAvailableUser();
+        var list = new System.Collections.ArrayList();
+        if (last != null)
         {
-            new Entity("login", EntityResponse.Success(string.Empty)),
-            new Entity("get_accounts", JsonSerializer.Serialize(accounts))
-        };
+            var u = UserManager.Instance.GetUserByEntityId(last.UserId);
+            if (u != null)
+            {
+                list.Add(new { type = "Success_login", entityId = u.UserId, channel = u.Channel });
+            }
+        }
+        var users = UserManager.Instance.GetUsersNoDetails();
+        var items = users.Select(u => new { entityId = u.UserId, channel = u.Channel }).ToArray();
+        list.Add(new { type = "accounts", items });
+        return list;
     }
 
     private static object HandleDefaultLogin(EntityLoginRequest entity)
     {
         LoginWithChannelAndType(entity.Channel, entity.Type, entity.Details, entity.Platform, entity.Token);
-        var accounts = UserManager.Instance.GetAvailableUsers();
-        return new object[]
+        var last = UserManager.Instance.GetLastAvailableUser();
+        var list = new System.Collections.ArrayList();
+        if (last != null)
         {
-            new Entity("login", EntityResponse.Success(string.Empty)),
-            new Entity("get_accounts", JsonSerializer.Serialize(accounts))
-        };
+            var u = UserManager.Instance.GetUserByEntityId(last.UserId);
+            if (u != null)
+            {
+                list.Add(new { type = "Success_login", entityId = u.UserId, channel = u.Channel });
+            }
+        }
+        var users = UserManager.Instance.GetUsersNoDetails();
+        var items = users.Select(u => new { entityId = u.UserId, channel = u.Channel }).ToArray();
+        list.Add(new { type = "accounts", items });
+        return list;
     }
 
     private static void LoginWithChannelAndType(string channel, string type, string details, Platform platform, string token)

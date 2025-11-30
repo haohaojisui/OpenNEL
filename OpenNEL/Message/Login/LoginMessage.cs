@@ -321,10 +321,6 @@ public class LoginMessage : IWsMessage
         {
             throw new ArgumentException("Invalid password login details");
         }
-        if (string.IsNullOrWhiteSpace(entityPasswordRequest.CaptchaIdentifier) || string.IsNullOrWhiteSpace(entityPasswordRequest.Captcha))
-        {
-            throw new ArgumentException("缺少验证码信息");
-        }
         using Pc4399 pc = new Pc4399();
         string result2 = pc.LoginWithPasswordAsync(entityPasswordRequest.Account, entityPasswordRequest.Password, entityPasswordRequest.CaptchaIdentifier, entityPasswordRequest.Captcha).GetAwaiter().GetResult();
         var (entityAuthenticationOtp2, text) = AppState.X19.LoginWithCookie(result2);

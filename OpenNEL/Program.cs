@@ -11,13 +11,13 @@ using System.Runtime.InteropServices;
 using Codexus.OpenSDK;
 using Codexus.OpenSDK.Entities.Yggdrasil;
 using Codexus.OpenSDK.Yggdrasil;
+using System.Runtime.CompilerServices;
 
 namespace OpenNEL;
 
 internal class Program
 {
     static async Task Main(string[] args){
-        ConfigureRuntime();
         ConfigureLogger();
         string currentDirectory = Directory.GetCurrentDirectory();
         if (PathUtil.ContainsChinese(currentDirectory))
@@ -67,8 +67,15 @@ internal class Program
         UserManager.Instance.ReadUsersFromDisk();
         Interceptor.EnsureLoaded();
         PacketManager.Instance.EnsureRegistered();
-        PluginManager.Instance.EnsureUninstall();
-        PluginManager.Instance.LoadPlugins("plugins");
+        try
+        {
+            PluginManager.Instance.EnsureUninstall();
+            PluginManager.Instance.LoadPlugins("plugins");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "插件加载失败");
+        }
         await Task.CompletedTask;
     }
 
@@ -89,9 +96,15 @@ internal class Program
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     static extern int MessageBox(IntPtr hWnd, string lpText, string lpCaption, uint uType);
-
-    static void ConfigureRuntime()
+    [StructLayout(LayoutKind.Sequential)]
+    struct PROCESS_MITIGATION_USER_SHADOW_STACK_POLICY { public uint Flags; public uint ReservedFlags; }
+    [DllImport("kernel32.dll")] static extern bool SetProcessMitigationPolicy(uint mitigationPolicy, ref PROCESS_MITIGATION_USER_SHADOW_STACK_POLICY buffer, int size);
+    [ModuleInitializer]
+    internal static void Initialize()
     {
-        Environment.SetEnvironmentVariable("COMPlus_UseSpecialUserModeApc", "0");
+        var p = new PROCESS_MITIGATION_USER_SHADOW_STACK_POLICY { Flags = 0, ReservedFlags = 0 };
+        SetProcessMitigationPolicy(15, ref p, Marshal.SizeOf<PROCESS_MITIGATION_USER_SHADOW_STACK_POLICY>());
     }
+
+    
 }

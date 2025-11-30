@@ -5,6 +5,7 @@ using OpenNEL.Entities;
 using OpenNEL.Entities.Web;
 using OpenNEL.Manager;
 using OpenNEL.Network;
+using OpenNEL.type;
 
 namespace OpenNEL.Message.Login;
 
@@ -17,7 +18,7 @@ internal class LoginX19Message : IWsMessage
         {
             var email = root.TryGetProperty("email", out var e) ? e.GetString() : string.Empty;
             var pwd = root.TryGetProperty("password", out var p) ? p.GetString() : string.Empty;
-            WPFLauncher x = OpenNEL.type.AppState.X19;
+            WPFLauncher x =AppState.X19;
             EntityX19CookieRequest req = WPFLauncher.GenerateCookie(x.LoginWithEmailAsync(email ?? string.Empty, pwd ?? string.Empty).GetAwaiter().GetResult(), x.MPay.GetDevice());
             var (authOtp, channel) = x.LoginWithCookie(req);
             UserManager.Instance.AddUserToMaintain(authOtp);

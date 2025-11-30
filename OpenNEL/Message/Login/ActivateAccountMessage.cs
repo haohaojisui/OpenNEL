@@ -43,7 +43,23 @@ internal class ActivateAccountMessage : IWsMessage
         }
         catch (System.Exception ex)
         {
-            return new { type = "activate_account_error", message = ex.Message ?? "激活失败" };
+            var msg = ex.Message ?? string.Empty;
+            var lower = msg.ToLowerInvariant();
+            if (lower.Contains("parameter") && lower.Contains("'s'"))
+            {
+                try
+                {
+                    var req = JsonSerializer.Deserialize<OpenNEL.Entities.Web.NEL.EntityPasswordRequest>(u.Details);
+                    var captchaSid = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N").Substring(0, 8);
+                    var url = "https://ptlogin.4399.com/ptlogin/captcha.do?captchaId=" + captchaSid;
+                    return new { type = "captcha_required", account = req?.Account ?? string.Empty, password = req?.Password ?? string.Empty, sessionId = captchaSid, captchaUrl = url };
+                }
+                catch
+                {
+                    return new { type = "captcha_required" };
+                }
+            }
+            return new { type = "activate_account_error", message = msg.Length == 0 ? "激活失败" : msg };
         }
     }
 }

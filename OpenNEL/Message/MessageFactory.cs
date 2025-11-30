@@ -17,6 +17,10 @@ internal static class MessageFactory
         var handlers = new IWsMessage[]
         {
             login,
+            new CookieLoginMessage(),
+            new Login4399Message(),
+            new LoginX19Message(),
+            new ActivateAccountMessage(),
             new DeleteAccountMessage(),
             new GetAccountMessage(),
             new SelectAccountMessage(),
@@ -39,13 +43,6 @@ internal static class MessageFactory
             new UpdateSettingsMessage()
         };
         Map = handlers.ToDictionary(h => h.Type, h => h);
-        Map["login_4399"] = login;
-        Map["login_x19"] = login;
-        Map["cookie_login"] = login;
-        Map["activate_account"] = login;
-        Map["active_with_captcha"] = login;
-        Map["active"] = login;
-        Map["send_code"] = login;
     }
 
     public static IWsMessage? Get(string type)

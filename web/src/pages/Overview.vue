@@ -117,6 +117,9 @@ const loginLoading = ref({})
 const currentActivatingId = ref('')
 const addLoading = ref(false)
 const noticeLoading = ref(false)
+function generateCaptchaIdentifier() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
 function isLoginLoading(acc) { return !!loginLoading.value[(acc && acc.entityId) || ''] }
 function getFreeAccount() {
   if (!socket || socket.readyState !== 1) return
@@ -260,6 +263,12 @@ onMounted(() => {
           pc4399NeedCaptcha.value = true
           newType.value = 'pc4399'
           showAdd.value = true
+          const sid = msg.sessionId || msg.session_id || pc4399SessionId.value || generateCaptchaIdentifier()
+          const url = msg.captchaUrl || msg.captcha_url || (`https://ptlogin.4399.com/ptlogin/captcha.do?captchaId=` + sid)
+          pc4399SessionId.value = sid
+          pc4399CaptchaUrl.value = url
+          pc4399Account.value = msg.account || pc4399Account.value || ''
+          pc4399Password.value = msg.password || pc4399Password.value || ''
           if (notify) notify('需要验证码', '请完成验证码后重试', 'warn')
         } else {
           if (notify) notify('操作失败', msg.message || '失败', 'error')

@@ -147,7 +147,7 @@ function getFreeAccount() {
     if (pc4399CaptchaUrl.value && pc4399SessionId.value) {
       const cap = pc4399Captcha.value && pc4399Captcha.value.trim()
       if (!cap) { freeBusy.value = false; return }
-      socket.send(JSON.stringify({
+      s.send(JSON.stringify({
         type: 'get_free_account',
         username: pc4399Account.value,
         password: pc4399Password.value,
@@ -157,12 +157,13 @@ function getFreeAccount() {
         captcha: cap
       }))
     } else {
-      socket.send(JSON.stringify({ type: 'get_free_account' }))
+      s.send(JSON.stringify({ type: 'get_free_account' }))
     }
   } catch {}
 }
 function confirmAdd() {
-  if (!socket || socket.readyState !== 1) return
+  const s = connection.socket.value
+  if (!s || s.readyState !== 1) return
   addLoading.value = true
   if (newType.value === 'cookie') {
     const v = cookieText.value && cookieText.value.trim()

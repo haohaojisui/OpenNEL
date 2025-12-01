@@ -66,7 +66,7 @@ public class LoginMessage : IWsMessage
         catch (Exception exception3)
         {
             Log.Error(exception3, "Login failed");
-            var msg = exception3.Message ?? string.Empty;
+            var msg = exception3.Message;
             if (msg.IndexOf("token expired", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return new { type = "login_error", message = "当前cookie过期了" };

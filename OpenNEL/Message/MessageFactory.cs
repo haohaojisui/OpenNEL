@@ -29,7 +29,6 @@ internal static class MessageFactory
             new OpenServerMessage(),
             new CreateRoleNamedMessage(),
             new JoinGameMessage(),
-            new ListChannelsMessage(),
             new ShutdownGameMessage(),
             new GetFreeAccountMessage(),
             new ListInstalledPluginsMessage(),

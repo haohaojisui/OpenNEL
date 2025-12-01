@@ -26,7 +26,7 @@ internal class GameManager
     
     public List<EntityQueryInterceptors> GetQueryInterceptors()
     {
-        return Interceptors.Values.Select((Interceptor interceptor, int index) => new EntityQueryInterceptors
+        return Interceptors.Values.Select((interceptor, index) => new EntityQueryInterceptors
         {
             Id = index.ToString(),
             Name = interceptor.Identifier,

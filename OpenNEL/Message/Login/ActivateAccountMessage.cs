@@ -41,9 +41,9 @@ internal class ActivateAccountMessage : IWsMessage
                 return new { type = "captcha_required" };
             }
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            var msg = ex.Message ?? string.Empty;
+            var msg = ex.Message;
             var lower = msg.ToLowerInvariant();
             if (lower.Contains("parameter") && lower.Contains("'s'"))
             {

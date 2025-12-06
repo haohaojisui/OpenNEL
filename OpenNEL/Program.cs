@@ -74,19 +74,10 @@ internal class Program
     
     static async Task InitializeSystemComponentsAsync()
     {
-        Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"));
         UserManager.Instance.ReadUsersFromDisk();
         Interceptor.EnsureLoaded();
         PacketManager.Instance.EnsureRegistered();
-        try
-        {
-            PluginManager.Instance.EnsureUninstall();
-            PluginManager.Instance.LoadPlugins("plugins");
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "插件加载失败");
-        }
+        PluginLoader.Initialize();
         await Task.CompletedTask;
     }
 
@@ -104,7 +95,4 @@ internal class Program
 
         return new Services(c4399, x19, yggdrasil);
     }
-
-    
-
 }

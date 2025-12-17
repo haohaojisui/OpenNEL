@@ -7,10 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12" VerticalAlignment="Top">
+    <Grid CornerRadius="8" Padding="12" VerticalAlignment="Top">
         <StackPanel Spacing="8">
             <TextBlock Text="广告" Style="{StaticResource SubtitleTextBlockStyle}"/>
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="12" MinHeight="160" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <Border CornerRadius="4" Padding="12" MinHeight="160" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>

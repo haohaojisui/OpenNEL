@@ -1,3 +1,20 @@
+/*
+<OpenNEL>
+Copyright (C) <2025>  <OpenNEL>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using System;
 using System.Linq;
 using OpenNEL.Entities;
@@ -44,7 +61,7 @@ public class JoinGame
             if (!ok) return new { type = "start_error", message = "启动失败" };
             return new { type = "channels_updated", ip = _lastIp, port = _lastPort };
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Log.Error(ex, "启动失败");
             return new { type = "start_error", message = "启动失败" };
@@ -55,22 +72,21 @@ public class JoinGame
     {
         var available = UserManager.Instance.GetLastAvailableUser();
         if (available == null) return false;
-        var entityId = available.UserId;
-        var roles = AppState.X19.QueryNetGameCharacters(entityId, available.AccessToken, serverId);
+        var roles = AppState.X19.QueryNetGameCharacters(available.UserId, available.AccessToken, serverId);
         var selected = roles.Data.FirstOrDefault(r => r.Name == roleId);
         if (selected == null) return false;
-        var details = AppState.X19.QueryNetGameDetailById(entityId, available.AccessToken, serverId);
-        var address = AppState.X19.GetNetGameServerAddress(entityId, available.AccessToken, serverId);
+        var details = AppState.X19.QueryNetGameDetailById(available.UserId, available.AccessToken, serverId);
+        var address = AppState.X19.GetNetGameServerAddress(available.UserId, available.AccessToken, serverId);
         var version = details.Data!.McVersionList[0];
         var gameVersion = GameVersionUtil.GetEnumFromGameVersion(version.Name);
-        var serverModInfo = await InstallerService.InstallGameMods(
-            entityId,
+        var serverMod = await InstallerService.InstallGameMods(
+            available.UserId,
             available.AccessToken,
             gameVersion,
-            AppState.X19,
+            new WPFLauncher(),
             serverId,
             false);
-        var mods = JsonSerializer.Serialize(serverModInfo);
+        var mods = JsonSerializer.Serialize(serverMod);
         SemaphoreSlim authorizedSignal = new SemaphoreSlim(0);
         var pair = Md5Mapping.GetMd5FromGameVersion(version.Name);
 
@@ -92,7 +108,7 @@ public class JoinGame
             {
                 try
                 {
-                    var latest = UserManager.Instance.GetAvailableUser(entityId);
+                    var latest = UserManager.Instance.GetAvailableUser(available.UserId);
                     var currentToken = latest?.AccessToken ?? available.AccessToken;
                     var success = await AppState.Services!.Yggdrasil.JoinServerAsync(new Codexus.OpenSDK.Entities.Yggdrasil.GameProfile
                     {
@@ -101,7 +117,7 @@ public class JoinGame
                         BootstrapMd5 = pair.BootstrapMd5,
                         DatFileMd5 = pair.DatFileMd5,
                         Mods = JsonSerializer.Deserialize<Codexus.OpenSDK.Entities.Yggdrasil.ModList>(mods)!,
-                        User = new Codexus.OpenSDK.Entities.Yggdrasil.UserProfile { UserId = int.Parse(entityId), UserToken = currentToken }
+                        User = new Codexus.OpenSDK.Entities.Yggdrasil.UserProfile { UserId = int.Parse(available.UserId), UserToken = currentToken }
                     }, certification);
                     if (success.IsSuccess) if (AppState.Debug) Log.Information("消息认证成功");
                         else
@@ -126,7 +142,7 @@ public class JoinGame
         _lastIp = interceptor.LocalAddress;
         _lastPort = interceptor.LocalPort;
 
-        await X19.InterconnectionApi.GameStartAsync(entityId, available.AccessToken, serverId);
+        await X19.InterconnectionApi.GameStartAsync(available.UserId, available.AccessToken, serverId);
         return true;
     }
 }

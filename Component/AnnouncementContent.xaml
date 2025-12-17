@@ -7,10 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="16">
+    <Grid CornerRadius="8" Padding="12">
         <StackPanel Spacing="8">
             <TextBlock Text="公告" Style="{StaticResource SubtitleTextBlockStyle}"/>
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="12">
+            <Border CornerRadius="4" Padding="12">
                 <TextBlock x:Name="ContentText" Text="暂无公告" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
             </Border>
         </StackPanel>

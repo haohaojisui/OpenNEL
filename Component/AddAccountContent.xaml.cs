@@ -1,3 +1,20 @@
+/*
+<OpenNEL>
+Copyright (C) <2025>  <OpenNEL>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -100,42 +117,12 @@ namespace OpenNEL_WinUI
                             FreeAccountMsg.Text = mVal.Length == 0 ? "获取失败" : mVal;
                         }
                     }
-                    else if (tVal == "get_free_account_requires_captcha")
-                    {
-                        var sidProp = payload.GetType().GetProperty("captchaId");
-                        var urlProp = payload.GetType().GetProperty("captchaImageUrl");
-                        var accProp = payload.GetType().GetProperty("username");
-                        var pwdProp = payload.GetType().GetProperty("password");
-                        var sidVal = sidProp?.GetValue(payload) as string ?? string.Empty;
-                        var urlVal = urlProp?.GetValue(payload) as string ?? string.Empty;
-                        var accVal = accProp?.GetValue(payload) as string ?? string.Empty;
-                        var pwdVal = pwdProp?.GetValue(payload) as string ?? string.Empty;
-                        SetCaptchaFor4399(sidVal, urlVal, accVal, pwdVal);
-                        FreeAccountMsg.Text = "需要验证码";
-                    }
                 }
             }
             catch (Exception ex)
             {
                 FreeAccountMsg.Text = ex.Message;
             }
-        }
-
-        public void SetCaptchaFor4399(string sessionId, string captchaUrl, string account, string password)
-        {
-            _pc4399SessionId = sessionId ?? string.Empty;
-            _pc4399CaptchaUrl = captchaUrl ?? string.Empty;
-            Pc4399Username.Text = account ?? string.Empty;
-            Pc4399Password.Password = password ?? string.Empty;
-            Pc4399CaptchaPanel.Visibility = string.IsNullOrWhiteSpace(_pc4399CaptchaUrl) ? Visibility.Collapsed : Visibility.Visible;
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(_pc4399CaptchaUrl))
-                {
-                    Pc4399CaptchaImage.Source = new BitmapImage(new Uri(_pc4399CaptchaUrl));
-                }
-            }
-            catch { }
         }
 
         public bool TryDetectSuccess(object result)
@@ -172,16 +159,6 @@ namespace OpenNEL_WinUI
             var users = UserManager.Instance.GetUsersNoDetails();
             if (users.Any(u => u.Authorized)) return true;
             return false;
-        }
-
-        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
-        {
-            try { ConfirmRequested?.Invoke(); } catch { }
-        }
-
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            try { CancelRequested?.Invoke(); } catch { }
         }
     }
 }

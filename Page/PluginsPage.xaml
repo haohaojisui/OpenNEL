@@ -16,7 +16,7 @@
 
     <Grid Padding="20">
         <!-- Card Container -->
-        <Grid Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+        <Grid CornerRadius="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>

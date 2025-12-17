@@ -2,7 +2,9 @@ OpenNEL
 ===========
 
 [![OpenNEL Download](https://img.shields.io/github/downloads/FandMC/OpenNEL/total?color=0&logo=github)](https://github.com/FandMC/OpenNEL/releases/latest)
-[![QQ](https://img.shields.io/badge/QQ_Unofficial-574456857-blue)](https://qm.qq.com/q/6gMnBzTV2E)
+[![QQ](https://img.shields.io/badge/QQ_Unofficial_1-574456857-blue)](https://qm.qq.com/q/6gMnBzTV2E)
+[![QQ](https://img.shields.io/badge/QQ_Unofficial_2-578806788-blue)](https://qm.qq.com/q/FDfBhpg7yW)
+[![QQ](https://img.shields.io/badge/QQ_Unofficial_3-824115841-blue)](https://qm.qq.com/q/h05MMBtaX8)
 
 ## 本项目基于基于 [Codexus.OpenSDK](https://github.com/corpnetease/Codexus.OpenSDK) 以及 Codexus.Development.SDK 制作的第三方启动器
 ### 安装要求

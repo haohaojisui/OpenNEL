@@ -30,7 +30,7 @@
                    VerticalAlignment="Center"
                    Visibility="{Binding NotLogin, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-        <Grid Grid.Row="1" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8"
+        <Grid Grid.Row="1" CornerRadius="8"
               Visibility="{Binding NotLogin, Converter={StaticResource BoolNegationConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
